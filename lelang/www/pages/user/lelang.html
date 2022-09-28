@@ -1,0 +1,104 @@
+<template>
+    <div class="page">
+        <div class="navbar">
+            <div class="navbar-bg"></div>
+            <div class="navbar-inner">
+                <div class="left">
+                    <!-- <a class="link back">
+                        <i class="icon icon-back"></i>
+                        <span class="if-not-md">Back</span>
+                    </a> -->
+                </div>
+                <div class="title">Lelang</div>
+                <div class="right">
+                    <a class="link sheet-open" href="#" data-sheet=".my-sheet-top">
+                        <i class="icon f7-icons">bell</i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="toolbar tabbar-labels toolbar-bottom">
+            <div class="toolbar-inner">
+                <a href="/home-user/" class="tab-link">
+                    <i class="icon f7-icons">house_alt_fill</i>
+                    <span class="tabbar-label">Home</span>
+                </a>
+                <a href="/lelang-user/" class="tab-link tab-link-active">
+                    <i class="icon f7-icons">cube_box_fill</i>
+                    <span class="tabbar-label">Barang</span>
+                </a>
+                <a href="/profil-user/" class="tab-link">
+                    <i class="icon f7-icons">person_alt_circle_fill</i>
+                    <span class="tabbar-label">Profil</span>
+                </a>
+            </div>
+        </div>
+        <div class="page-content">
+            <div class="block-title">List Menu</div>
+            <div class="card">
+                <div class="card-content">
+                    <div class="list links-list no-ios-edges">
+                        <ul>
+                            <li><a href="/daftar-barang/">Daftarkan Barang</a></li>
+                            <li><a href="/histori-penawaran/">Histori Penawaran</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="sheet-modal sheet-modal-top my-sheet-top">
+            <div class="toolbar toolbar-bottom">
+                <div class="toolbar-inner">
+                    <div class="left"></div>
+                    <div class="right"><a class="link sheet-close" href="#">Tutup</a></div>
+                </div>
+            </div>
+            <div class="sheet-modal-inner">
+                <div class="page-content">
+                    <div class="block">
+                        <h4>Info</h4>
+                        <div class="list-notif">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+    export default (props, {
+        $,
+        $on,
+        $f7
+    }) => {
+        $on('pageInit', () => {
+            //code
+            let idUser = store.state.users[0];
+            let namaDB = "notif";
+            firebase.database().ref(namaDB).on('value', function (snapshot) {
+                // console.log(snapshot.val())
+                if (snapshot.val()) {
+                    for (const [key, value] of Object.entries(snapshot.val())) {
+                        // console.log(`${value.idPenawar} == ${idUser}`)
+                        if (value.idPenawar == idUser) {
+                            $('.list-notif').append(`
+                                <div class="row card padding">
+                                    <div class="col">
+                                        Selamat anda adalah pemenang lelang.
+                                        <div class="row padding-top">
+                                            <a href="/checkout/?idBarang=${value.idLelang}&idPenjual=${value.idPenjual}" class="col button button-fill color-green">Checkout</a>
+                                            <a href="/lihat-lelang/?idBarang=${value.idLelang}&idPenjual=${value.idPenjual}" class="col button button-fill">Lihat Detail</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            `);
+                        }
+                    }
+                }
+            });
+        });
+
+        return $render;
+    }
+</script>

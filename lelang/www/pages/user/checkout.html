@@ -1,0 +1,179 @@
+<template>
+    <div class="page">
+        <div class="navbar">
+            <div class="navbar-bg"></div>
+            <div class="navbar-inner">
+                <div class="left">
+                    <a class="link back">
+                        <i class="icon icon-back"></i>
+                        <span class="if-not-md">Back</span>
+                    </a>
+                </div>
+                <div class="title">Lelang - Checkout</div>
+                <div class="right">
+                </div>
+            </div>
+        </div>
+        <div class="toolbar tabbar-labels toolbar-bottom">
+            <div class="toolbar-inner">
+                <a href="/home-user/" class="tab-link">
+                    <i class="icon f7-icons">house_alt_fill</i>
+                    <span class="tabbar-label">Home</span>
+                </a>
+                <a href="/lelang-user/" class="tab-link tab-link-active">
+                    <i class="icon f7-icons">cube_box_fill</i>
+                    <span class="tabbar-label">Barang</span>
+                </a>
+                <a href="/profil-user/" class="tab-link">
+                    <i class="icon f7-icons">person_alt_circle_fill</i>
+                    <span class="tabbar-label">Profil</span>
+                </a>
+            </div>
+        </div>
+        <div class="page-content">
+            <div class="block-title">Transfer Bank</div>
+            <div class="card">
+                <div class="card-content card-content-padding">
+                    <p><u>Rekening BRI</u></p>
+                    <p>AN : Fitri</p>
+                    <p>No. REK : 042132412546</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-content card-content-padding">
+                    <form class="list form-store-data" id="my-form">
+                        <ul class="padding">
+                            <li class="input-checkout">
+                                <div class="item-content item-input">
+                                    <div class="item-inner">
+                                        <div class="item-title item-label">Nama</div>
+                                        <div class="item-input-wrap">
+                                            <input type="text" name="nama" placeholder="Nama Penerima" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="input-checkout">
+                                <div class="item-content item-input">
+                                    <div class="item-inner">
+                                        <div class="item-title item-label">No. HP</div>
+                                        <div class="item-input-wrap">
+                                            <input type="text" name="hp" placeholder="No HP" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="input-checkout">
+                                <div class="item-content item-input">
+                                    <div class="item-inner">
+                                        <div class="item-title item-label">Alamat</div>
+                                        <div class="item-input-wrap">
+                                            <input type="text" name="alamat" placeholder="Alamat Penerima" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="item-content item-input">
+                                    <div class="item-inner">
+                                        <div class="item-title item-label">Bukti Pembayaran</div>
+                                        <div class="item-input-wrap">
+                                            <input type="file" name="bukti" id="bukti" />
+                                            <input type="text" name="foto" style="display: none;" />
+                                            <img id="img" src="" width="100%" style="display: none;" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <input type="text" name="idPenjual" style="display: none;" />
+                            <input type="text" name="idBarang" style="display: none;" />
+                            <input type="text" name="idUser" style="display: none;" />
+                            <input type="text" name="konfirmasi" value="false" style="display: none;" />
+                        </ul>
+                    </form>
+                </div>
+            </div>
+            <div class="block block-strong row input-checkout">
+                <div class="col"><a class="button button-fill convert-form-to-data" href="#">Checkout</a></div>
+            </div>
+        </div>
+        <div class="sheet-modal sheet-modal-top my-sheet-top">
+            <div class="toolbar toolbar-bottom">
+                <div class="toolbar-inner">
+                    <div class="left"></div>
+                    <div class="right"><a class="link sheet-close" href="#">Tutup</a></div>
+                </div>
+            </div>
+            <div class="sheet-modal-inner">
+                <div class="block">
+                    <h4>Info</h4>
+                    <div class="list-notif">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+    export default (props, {
+        $,
+        $on,
+        $f7
+    }) => {
+        $on('pageInit', () => {
+            //code
+            let idUser = store.state.users[0];
+            let idBarang = app.views.main.router.currentRoute.query.idBarang;
+            let idPenjual = app.views.main.router.currentRoute.query.idPenjual;
+            let namaDB = "checkout";
+            $('[name="idUser"]').val(idUser);
+            $('[name="idBarang"]').val(idBarang);
+            $('[name="idPenjual"]').val(idPenjual);
+            firebase.database().ref(namaDB).on('value', function (snapshot) {
+                // console.log(snapshot.val())
+                if (snapshot.val()) {
+                    for (const [key, value] of Object.entries(snapshot.val())) {
+                        // console.log(`${value.idPenawar} == ${idUser}`)
+                        if (value.idBarang == idBarang && value.idUser == idUser) {
+                            // console.log(value)
+                            $('#bukti').hide();
+                            $('.input-checkout').hide();
+                            $('#img').show();
+                            $('#img').prop('src', value.foto);
+                        }
+                    }
+                }
+            });
+
+            $('.convert-form-to-data').on('click', function () {
+                let file = $('#bukti').prop('files')[0];
+                if (file) {
+                    let metadata = {
+                        'contentType': file.type
+                    };
+                    uploadFile(file, metadata, 'checkout').then(res => {
+                        if (res.status) {
+                            res.url.then(hsl => {
+                                //masukka url ke inputan
+                                $('#my-form [name="foto"]').val(hsl);
+                                console.log(hsl);
+                                //fungsi simpan
+                                let formData = $f7.form.convertToData('#my-form');
+                                tambahData(namaDB, formData).then(res => {
+                                    $f7.dialog.alert(res.pesan);
+                                    app.views.main.router.back();
+                                });
+                            });
+                        } else {
+                            $f7.dialog.alert('Gagal menyimpan data');
+                        }
+                    });
+                }
+            });
+        });
+
+        return $render;
+    }
+</script>

@@ -1,0 +1,133 @@
+<template>
+    <div class="page">
+        <div class="navbar">
+            <div class="navbar-bg"></div>
+            <div class="navbar-inner">
+                <div class="left">
+                    <a class="link back">
+                        <i class="icon icon-back"></i>
+                        <span class="if-not-md">Back</span>
+                    </a>
+                </div>
+                <div class="title">List Data - Data Pembayaran</div>
+                <div class="right"></div>
+            </div>
+        </div>
+        <div class="toolbar tabbar-labels toolbar-bottom">
+            <div class="toolbar-inner">
+                <a href="/home-admin/" class="tab-link">
+                    <i class="icon f7-icons">house_alt_fill</i>
+                    <span class="tabbar-label">Home</span>
+                </a>
+                <a href="/list-data/" class="tab-link tab-link-active">
+                    <i class="icon f7-icons">square_list_fill</i>
+                    <span class="tabbar-label">List Data</span>
+                </a>
+                <a href="/login-user/" class="tab-link">
+                    <i class="icon f7-icons">arrow_right_square_fill</i>
+                    <span class="tabbar-label">Sign Out</span>
+                </a>
+            </div>
+        </div>
+        <div class="page-content">
+            <form class="list" id="my-form" style="display: none;">
+                <input type="text" name="konfirmasi" value="true" />
+            </form>
+            <div class="block-title">Daftar Pembayaran</div>
+            <div class="data-table data-table-init card">
+                <div class="card-content">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="label-cell">No.</th>
+                                <th class="label-cell">Nama</th>
+                                <th class="label-cell">No. HP</th>
+                                <th class="label-cell">Alamat</th>
+                                <th class="label-cell">Bukti Pembayaran</th>
+                                <th class="label-cell">Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="daftar-pembayaran-table-body">
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+    export default (props, {
+        $,
+        $on,
+        $f7
+    }) => {
+        $on('pageInit', () => {
+            let idUser = store.state.users[0];
+            let namaDB = "checkout";
+            let tabelBody = $('#daftar-pembayaran-table-body');
+            //list data barang realtime
+            firebase.database().ref(namaDB).on('value', function (snapshot) {
+                // console.log(snapshot.val())
+                let rowTabel = "";
+                if (snapshot.val()) {
+                    let index = 1;
+                    for (const [key, value] of Object.entries(snapshot.val())) {
+                        // console.log(`${key} == ${idUser}`);
+                        let konfirmasi = "";
+                        if (value.konfirmasi == "true") {
+                            konfirmasi = "Data sudah dikonfirmasi";
+                            rowTabel += `
+                                <tr>
+                                    <td class="label-cell">${index++}</td>
+                                    <td class="label-cell">${value.nama}</td>
+                                    <td class="label-cell">${value.hp}</td>
+                                    <td class="label-cell">${value.alamat}</td>
+                                    <td class="label-cell"><img src="${value.foto}" width="100px"></td>
+                                    <td class="label-cell">${konfirmasi}</td>
+                                    <td class="actions-cell">-</td>
+                                </tr>
+                            `;
+                        } else {
+                            konfirmasi = "Menunggu Konfirmasi";
+                            rowTabel += `
+                                <tr>
+                                    <td class="label-cell">${index++}</td>
+                                    <td class="label-cell">${value.nama}</td>
+                                    <td class="label-cell">${value.hp}</td>
+                                    <td class="label-cell">${value.alamat}</td>
+                                    <td class="label-cell"><img src="${value.foto}" width="100px"></td>
+                                    <td class="label-cell">${konfirmasi}</td>
+                                    <td class="actions-cell">
+                                        <a href="#" class="button button-fill color-green konfirmasi" data-id="${key}"">Konfirmasi</a>
+                                    </td>
+                                </tr>
+                            `;
+                        }
+                    }
+                }
+                if (rowTabel != "") {
+                    tabelBody.html(rowTabel);
+                } else {
+                    tabelBody.html(`<tr><td colspan="10">belum ada data saat ini</td></tr>`);
+                }
+            });
+
+            //button konfirmasi
+            $('#daftar-pembayaran-table-body').on('click', '.konfirmasi', function () {
+                let id = $(this).data('id');
+                // console.log(id)
+                let formData = $f7.form.convertToData('#my-form');
+                $f7.dialog.confirm('Apakah anda yakin akan mengkonfirmasi pembayaran ini?',
+                    function () {
+                        updateData(namaDB + '/' + id, formData).then(res => {
+                            $f7.dialog.alert('Data Berhasil dikonfirmasi');
+                        });
+                    });
+            });
+        });
+
+        return $render;
+    }
+</script>
