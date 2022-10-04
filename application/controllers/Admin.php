@@ -99,6 +99,14 @@ class Admin extends My_Controller
       'navbar' => 'acaksoal',
     ];
 
+    $this->load->view('templates/header', $data);
+    $this->load->view('templates/navbar', $data);
+    $this->load->view('admin/acaksoal', $data);
+    $this->load->view('templates/footer');
+  }
+
+  public function LCM()
+  {
     $n = 20; #jumlah looping
     $a = 11; #konstanta harus lebih besar dari m
     $m = 25; #harus bilangan prima
@@ -119,10 +127,5 @@ class Admin extends My_Controller
 
       echo $Xn[$i]." - ";
     }
-
-    $this->load->view('templates/header', $data);
-    $this->load->view('templates/navbar', $data);
-    $this->load->view('admin/acaksoal', $data);
-    $this->load->view('templates/footer');
   }
 }
