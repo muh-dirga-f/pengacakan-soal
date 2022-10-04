@@ -98,6 +98,28 @@ class Admin extends My_Controller
       'judul' => 'Data Acak Soal',
       'navbar' => 'acaksoal',
     ];
+
+    $n = 20; #jumlah looping
+    $a = 11; #konstanta harus lebih besar dari m
+    $m = 25; #harus bilangan prima
+    $c = 3; #konstanta harus angka ganjil
+    $Xn0 = mt_rand(5,$m); #angka ganjil cukup besar
+    $Xn = [];
+
+    for ($i=1; $i<=$n; $i++) {
+      if($i == 1){
+        $Xn[$i] = ($a * $Xn0 + $c) % $m;
+      }else if($i>1 && $i<<10){
+        $Xn[$i] = ($a * $Xn[$i-1] + $c) % $m;
+      }else{
+        echo "Algoritma LCM Telah Selesai";
+        break;
+      }
+      if($Xn[$i] == 0) $Xn[$i] = 1;
+
+      echo $Xn[$i]." - ";
+    }
+
     $this->load->view('templates/header', $data);
     $this->load->view('templates/navbar', $data);
     $this->load->view('admin/acaksoal', $data);
